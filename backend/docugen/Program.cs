@@ -27,11 +27,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://127.0.0.1:3000", // Your Live Server
-                                             "http://localhost:3000") // In case browser uses localhost
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials(); // <-- CRITICAL for cookie auth
+                          policy.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
                       });
 });
 
