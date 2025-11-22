@@ -3,12 +3,13 @@ using docugen.Data;
 using Microsoft.EntityFrameworkCore;
 using docugen.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace docugen
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class PdfController : ControllerBase
     {
         private readonly ApiDbContext _context;
@@ -16,6 +17,19 @@ namespace docugen
         public PdfController(ApiDbContext context)
         {
             _context = context;
+        }
+
+        // Extrae el id del usuario del token JWT
+        private int GetCurrentUserId()
+        {
+            var idClaim = User.FindFirst("id") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
+            {
+                return userId;
+            }
+
+            throw new UnauthorizedAccessException("User ID could not be found in the token.");
         }
 
         [HttpPost("generate/{id}")]
@@ -28,6 +42,13 @@ namespace docugen
                 .Include(c => c.Intereses)
                 .Include(c => c.Template)
                 .FirstOrDefaultAsync(c => c.id == id);
+
+            int userId = GetCurrentUserId();
+
+            if (cvData.userId != userId)
+            {
+                return NotFound($"CV with ID {id} not found.");
+            }
 
             if (cvData == null)
             {

@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynaDoc - Header Auth Client</title>
+    <title>DynaDoc - Full Client</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background: #f4f4f4;
@@ -32,6 +32,14 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
             color: #555;
+        }
+
+        h3 {
+            font-size: 1.1em;
+            color: #007bff;
+            margin-top: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
         }
 
         .hidden {
@@ -81,6 +89,19 @@
             border-radius: 4px;
         }
 
+        /* Grid for side-by-side inputs */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
         .card {
             border: 1px solid #e1e1e1;
             padding: 15px;
@@ -101,14 +122,6 @@
             margin-bottom: 15px;
             display: none;
         }
-
-        .info {
-            background: #e2e3e5;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
     </style>
 </head>
 
@@ -119,10 +132,7 @@
         <div id="error-msg" class="error"></div>
 
         <div id="view-auth">
-            <h2>Login / Register</h2>
-            <div class="info">
-                Status: <strong>Header Authentication</strong> (Bearer Token)
-            </div>
+            <h2>Login</h2>
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" id="auth-user" placeholder="Enter username">
@@ -152,28 +162,87 @@
 
         <div id="view-create" class="hidden">
             <h2>Create New CV</h2>
+
             <div class="form-group">
                 <label>Select Template</label>
                 <select id="create-template"></select>
             </div>
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="create-name" placeholder="e.g. Maria Garcia">
+
+            <h3>Personal Information</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="cv-name" placeholder="e.g. Maria Garcia">
+                </div>
+                <div class="form-group">
+                    <label>Occupation</label>
+                    <input type="text" id="cv-job" placeholder="e.g. Software Engineer">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="cv-email" placeholder="maria@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="cv-phone" placeholder="555-1234">
+                </div>
             </div>
             <div class="form-group">
-                <label>Occupation</label>
-                <input type="text" id="create-job" placeholder="e.g. Software Engineer">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="create-email" placeholder="maria@example.com">
+                <label>Address</label>
+                <input type="text" id="cv-address" placeholder="City, Country">
             </div>
 
-            <div class="info">
-                <strong>Note:</strong> Education, Work, Skills, and Interests are hardcoded for this demo.
+            <h3>Education (Latest)</h3>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input type="text" id="cv-edu-school" placeholder="University Name">
+                </div>
+                <div class="form-group">
+                    <label>Degree/Career</label>
+                    <input type="text" id="cv-edu-degree" placeholder="B.S. Computer Science">
+                </div>
+                <div class="form-group">
+                    <label>Graduation Year</label>
+                    <input type="text" id="cv-edu-date" placeholder="2024">
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px;">
+            <h3>Work Experience (Latest)</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" id="cv-work-company" placeholder="Tech Corp">
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" id="cv-work-role" placeholder="Senior Developer">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="text" id="cv-work-start" placeholder="Jan 2020">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="text" id="cv-work-end" placeholder="Present">
+                </div>
+            </div>
+
+            <h3>Skills & Interests</h3>
+            <div class="form-group">
+                <label>Skills (Comma separated)</label>
+                <input type="text" id="cv-skills" placeholder="C#, SQL, React, Docker">
+            </div>
+            <div class="form-group">
+                <label>Interests (Comma separated)</label>
+                <input type="text" id="cv-interests" placeholder="Reading, Hiking, Gaming">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn" onclick="submitCv()">Save CV</button>
                 <button class="btn btn-secondary" onclick="showDashboard()">Cancel</button>
             </div>
@@ -181,19 +250,13 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const API_URL = "http://localhost:5116/api";
-
-        // STATE
+        const API_URL = "http://cv.hjanssen.xyz/api";
         let token = localStorage.getItem('token');
         let userId = localStorage.getItem('userId');
 
-        // --- INITIALIZATION ---
-        if (token) {
-            showDashboard();
-        }
+        if (token) showDashboard();
 
-        // --- VIEW MANAGEMENT ---
+        // --- VIEW LOGIC ---
         function hideAllViews() {
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('view-dashboard').classList.add('hidden');
@@ -211,13 +274,13 @@
             hideAllViews();
             document.getElementById('view-create').classList.remove('hidden');
             loadTemplates();
+            // Clear inputs
+            document.querySelectorAll('#view-create input').forEach(i => i.value = '');
         }
 
         function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userId');
-            token = null;
-            userId = null;
+            localStorage.clear();
+            token = null; userId = null;
             hideAllViews();
             document.getElementById('view-auth').classList.remove('hidden');
         }
@@ -228,12 +291,10 @@
             el.style.display = 'block';
         }
 
-        // --- AUTHENTICATION ---
+        // --- API CALLS ---
         async function handleLogin() {
             const u = document.getElementById('auth-user').value;
             const p = document.getElementById('auth-pass').value;
-
-            if (!u || !p) return showError("Please enter username and password");
 
             try {
                 const res = await fetch(`${API_URL}/auth/login`, {
@@ -242,116 +303,63 @@
                     body: JSON.stringify({ Username: u, Password: p })
                 });
 
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(text || "Login failed");
-                }
-
+                if (!res.ok) throw new Error("Login failed");
                 const data = await res.json();
 
-                // HERE WE SAVE THE TOKEN manually
                 token = data.token;
                 userId = data.userId;
-
-                if (!token) throw new Error("No token received from server");
-
                 localStorage.setItem('token', token);
                 localStorage.setItem('userId', userId);
-
                 showDashboard();
-            } catch (e) {
-                showError(e.message);
-            }
+            } catch (e) { showError(e.message); }
         }
 
         async function handleRegister() {
             const u = document.getElementById('auth-user').value;
             const p = document.getElementById('auth-pass').value;
-
-            if (!u || !p) return showError("Please enter username and password");
-
             try {
                 const res = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ Username: u, Password: p })
                 });
-
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(text || "Registration failed");
-                }
-                alert("Registered! Please log in.");
-            } catch (e) {
-                showError(e.message);
-            }
+                if (!res.ok) throw new Error("Register failed");
+                alert("Registered! Please login.");
+            } catch (e) { showError(e.message); }
         }
 
-        // --- DASHBOARD (READ) ---
         async function fetchCvs() {
             const list = document.getElementById('cv-list');
-            list.innerHTML = '<p style="text-align:center;">Loading...</p>';
-
+            list.innerHTML = 'Loading...';
             try {
                 const res = await fetch(`${API_URL}/Cv`, {
-                    // HERE WE SEND THE HEADER manually
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (res.status === 401) {
-                    logout();
-                    return;
-                }
-                if (!res.ok) throw new Error("Failed to fetch CVs");
-
+                if (res.status === 401) return logout();
                 const cvs = await res.json();
-                list.innerHTML = "";
 
-                if (cvs.length === 0) {
-                    list.innerHTML = '<p style="text-align:center;">No CVs found. Click "Create New CV" to start.</p>';
-                    return;
-                }
+                list.innerHTML = "";
+                if (cvs.length === 0) list.innerHTML = "<p>No CVs found.</p>";
 
                 cvs.forEach(cv => {
                     const div = document.createElement('div');
                     div.className = 'card';
                     div.innerHTML = `
-                    <div>
-                        <strong style="font-size:1.1em;">${cv.nombre}</strong> <br>
-                        <small style="color:#666;">${cv.ocupacion || 'No occupation'}</small>
-                    </div>
-                    <button class="btn" onclick="downloadPdf(${cv.id})">Download PDF</button>
+                    <div><strong>${cv.nombre}</strong><br><small>${cv.ocupacion}</small></div>
+                    <button class="btn" onclick="downloadPdf(${cv.id})">PDF</button>
                 `;
                     list.appendChild(div);
                 });
-            } catch (e) {
-                showError("Error loading CVs: " + e.message);
-            }
+            } catch (e) { showError(e.message); }
         }
 
-        // --- CREATE CV ---
         async function loadTemplates() {
             const select = document.getElementById('create-template');
-            select.innerHTML = "<option>Loading...</option>";
-
             try {
-                // FIXED: Added headers with the token
                 const res = await fetch(`${API_URL}/pdf/list`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (res.status === 401) {
-                    // If token expired or invalid, force logout
-                    logout();
-                    return;
-                }
-
                 const templates = await res.json();
-
                 select.innerHTML = "";
                 templates.forEach(t => {
                     const opt = document.createElement('option');
@@ -359,28 +367,43 @@
                     opt.innerText = t.name || `Template ${t.id}`;
                     select.appendChild(opt);
                 });
-            } catch (e) {
-                console.error(e);
-                select.innerHTML = "<option>Error loading templates</option>";
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function submitCv() {
-            const name = document.getElementById('create-name').value;
-            if (!name) return showError("Name is required");
+            // 1. Helper to split comma separated strings
+            const parseList = (str, key) => str.split(',').map(s => s.trim()).filter(s => s).map(s => ({ [key]: s }));
 
+            // 2. Build the payload
             const payload = {
                 templateId: parseInt(document.getElementById('create-template').value),
-                userId: parseInt(userId), // We use the ID from login
-                nombre: name,
-                ocupacion: document.getElementById('create-job').value,
-                email: document.getElementById('create-email').value,
-                telefono: "555-0123",
-                direccion: "Mexico City",
-                educacion: [{ institucion: "Demo University", carrera: "Computer Science", fecha_Graduacion: "2024" }],
-                trabajo: [{ empresa: "Tech Demo Inc", puesto: "Developer", fecha_Inicio: "2023", fecha_Final: "Present" }],
-                habilidades: [{ habilidad: "JavaScript" }, { habilidad: ".NET Core" }],
-                intereses: [{ interes: "Coding" }]
+                userId: parseInt(userId),
+
+                // Basics
+                nombre: document.getElementById('cv-name').value,
+                ocupacion: document.getElementById('cv-job').value,
+                email: document.getElementById('cv-email').value,
+                telefono: document.getElementById('cv-phone').value,
+                direccion: document.getElementById('cv-address').value,
+
+                // Education (Single Item)
+                educacion: [{
+                    institucion: document.getElementById('cv-edu-school').value,
+                    carrera: document.getElementById('cv-edu-degree').value,
+                    fecha_Graduacion: document.getElementById('cv-edu-date').value
+                }],
+
+                // Work (Single Item)
+                trabajo: [{
+                    empresa: document.getElementById('cv-work-company').value,
+                    puesto: document.getElementById('cv-work-role').value,
+                    fecha_Inicio: document.getElementById('cv-work-start').value,
+                    fecha_Final: document.getElementById('cv-work-end').value
+                }],
+
+                // Skills & Interests (Comma Separated)
+                habilidades: parseList(document.getElementById('cv-skills').value, "habilidad"),
+                intereses: parseList(document.getElementById('cv-interests').value, "interes")
             };
 
             try {
@@ -388,30 +411,22 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Send Header
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(payload)
                 });
-
-                if (!res.ok) throw new Error("Failed to create CV");
-
+                if (!res.ok) throw new Error("Failed to save CV");
                 showDashboard();
-            } catch (e) {
-                showError(e.message);
-            }
+            } catch (e) { showError(e.message); }
         }
 
-        // --- GENERATE PDF ---
         async function downloadPdf(cvId) {
             try {
                 const res = await fetch(`${API_URL}/pdf/generate/${cvId}`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Send Header
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (!res.ok) throw new Error("PDF generation failed");
+                if (!res.ok) throw new Error("Error generating PDF");
 
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -421,13 +436,9 @@
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (e) {
-                showError(e.message);
-            }
+            } catch (e) { showError(e.message); }
         }
     </script>
-
 </body>
 
 </html>
