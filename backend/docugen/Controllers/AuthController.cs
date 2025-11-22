@@ -57,17 +57,21 @@ namespace docugen.Controllers
                 return Unauthorized("Invalid username or password.");
             }
 
-            var token = GenerateJwtToken(user.Username, user.Id);
+            var tokenString = GenerateJwtToken(user.Username, user.Id);
 
-            Response.Cookies.Append("token", token, new CookieOptions
+            // Response.Cookies.Append("token", tokenString, new CookieOptions
+            // {
+            //     HttpOnly = true,
+            //     Secure = true,
+            //     SameSite = SameSiteMode.None,
+            //     Expires = DateTime.Now.AddHours(1)
+            // });
+
+            return Ok(new
             {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddHours(1)
+                token = tokenString,
+                userId = user.Id
             });
-
-            return Ok(new { message = "Login successful" });
         }
 
         private string GenerateJwtToken(string username, int id)

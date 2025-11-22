@@ -22,7 +22,7 @@ namespace docugen.Controllers
         // Extrae el id del usuario del token JWT
         private int GetCurrentUserId()
         {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("id");
+            var idClaim = User.FindFirst("id") ?? User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
             {

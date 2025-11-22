@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynaDoc - Barebones Client</title>
+    <title>DynaDoc - Header Auth Client</title>
     <style>
-        /* Simple styling for the demo */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             background: #f4f4f4;
+            color: #333;
         }
 
         .container {
@@ -24,7 +24,7 @@
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #2c3e50;
         }
 
         h2 {
@@ -93,7 +93,7 @@
         }
 
         .error {
-            color: #dc3545;
+            color: #721c24;
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             padding: 10px;
@@ -102,7 +102,13 @@
             display: none;
         }
 
-        /* Hidden by default */
+        .info {
+            background: #e2e3e5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 
@@ -114,6 +120,9 @@
 
         <div id="view-auth">
             <h2>Login / Register</h2>
+            <div class="info">
+                Status: <strong>Header Authentication</strong> (Bearer Token)
+            </div>
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" id="auth-user" placeholder="Enter username">
@@ -160,9 +169,8 @@
                 <input type="email" id="create-email" placeholder="maria@example.com">
             </div>
 
-            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9em;">
-                <strong>Note:</strong> For this barebones demo, Education, Work, Skills, and Interests are hardcoded in
-                the JavaScript.
+            <div class="info">
+                <strong>Note:</strong> Education, Work, Skills, and Interests are hardcoded for this demo.
             </div>
 
             <div style="display: flex; gap: 10px;">
@@ -174,9 +182,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        // UPDATED: Pointing to your live domain
-        // If you are not using SSL (https), change this to http://
-        const API_URL = "http://cv.hjanssen.xyz/api";
+        const API_URL = "http://localhost:5116/api";
 
         // STATE
         let token = localStorage.getItem('token');
@@ -193,7 +199,6 @@
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-create').classList.add('hidden');
             document.getElementById('error-msg').style.display = 'none';
-            document.getElementById('error-msg').innerText = '';
         }
 
         function showDashboard() {
@@ -209,7 +214,8 @@
         }
 
         function logout() {
-            localStorage.clear();
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
             token = null;
             userId = null;
             hideAllViews();
@@ -237,21 +243,17 @@
                 });
 
                 if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText || "Login failed");
+                    const text = await res.text();
+                    throw new Error(text || "Login failed");
                 }
 
                 const data = await res.json();
 
+                // HERE WE SAVE THE TOKEN manually
                 token = data.token;
-                userId = data.userId; // Ensure your API returns userId now!
+                userId = data.userId;
 
-                if (!userId) {
-                    // Fallback if API isn't returning userId yet
-                    // You will need to decode the token here if that's the case
-                    console.warn("API did not return userId. Defaulting to 1 for demo.");
-                    userId = 1;
-                }
+                if (!token) throw new Error("No token received from server");
 
                 localStorage.setItem('token', token);
                 localStorage.setItem('userId', userId);
@@ -276,10 +278,10 @@
                 });
 
                 if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText || "Registration failed");
+                    const text = await res.text();
+                    throw new Error(text || "Registration failed");
                 }
-                alert("Registered successfully! Please log in.");
+                alert("Registered! Please log in.");
             } catch (e) {
                 showError(e.message);
             }
@@ -292,10 +294,16 @@
 
             try {
                 const res = await fetch(`${API_URL}/Cv`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // HERE WE SEND THE HEADER manually
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
-                if (res.status === 401) { logout(); return; }
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
                 if (!res.ok) throw new Error("Failed to fetch CVs");
 
                 const cvs = await res.json();
@@ -326,10 +334,22 @@
         // --- CREATE CV ---
         async function loadTemplates() {
             const select = document.getElementById('create-template');
-            select.innerHTML = "<option>Loading templates...</option>";
+            select.innerHTML = "<option>Loading...</option>";
 
             try {
-                const res = await fetch(`${API_URL}/pdf/list`);
+                // FIXED: Added headers with the token
+                const res = await fetch(`${API_URL}/pdf/list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (res.status === 401) {
+                    // If token expired or invalid, force logout
+                    logout();
+                    return;
+                }
+
                 const templates = await res.json();
 
                 select.innerHTML = "";
@@ -346,23 +366,21 @@
         }
 
         async function submitCv() {
-            // Basic validation
             const name = document.getElementById('create-name').value;
             if (!name) return showError("Name is required");
 
             const payload = {
                 templateId: parseInt(document.getElementById('create-template').value),
-                userId: parseInt(userId),
+                userId: parseInt(userId), // We use the ID from login
                 nombre: name,
                 ocupacion: document.getElementById('create-job').value,
                 email: document.getElementById('create-email').value,
-                // Hardcoded lists for this demo
                 telefono: "555-0123",
                 direccion: "Mexico City",
                 educacion: [{ institucion: "Demo University", carrera: "Computer Science", fecha_Graduacion: "2024" }],
                 trabajo: [{ empresa: "Tech Demo Inc", puesto: "Developer", fecha_Inicio: "2023", fecha_Final: "Present" }],
                 habilidades: [{ habilidad: "JavaScript" }, { habilidad: ".NET Core" }],
-                intereses: [{ interes: "Coding" }, { interes: "Reading" }]
+                intereses: [{ interes: "Coding" }]
             };
 
             try {
@@ -370,7 +388,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}` // Send Header
                     },
                     body: JSON.stringify(payload)
                 });
@@ -388,7 +406,9 @@
             try {
                 const res = await fetch(`${API_URL}/pdf/generate/${cvId}`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Send Header
+                    }
                 });
 
                 if (!res.ok) throw new Error("PDF generation failed");
