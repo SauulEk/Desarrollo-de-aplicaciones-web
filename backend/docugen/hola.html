@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Auth Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        input {
+            margin-right: 10px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #status {
+            font-weight: bold;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>API Auth Test</h1>
+
+    <form id="register-form">
+        <h3>1. Register a New User</h3>
+        <input type="text" id="reg-username" placeholder="Username" />
+        <input type="password" id="reg-password" placeholder="Password" />
+        <button type="submit">Register</button>
+    </form>
+
+    <hr>
+
+    <form id="login-form">
+        <h3>2. Login to Get Cookie</h3>
+        <input type="text" id="username" value="test" placeholder="Username" />
+        <input type="password" id="password" value="password123" placeholder="Password" />
+        <button type="submit">Login</button>
+    </form>
+
+    <hr>
+
+    <div>
+        <h3>3. Get Protected PDF</h3>
+        <button id="pdf-button">Get PDF (using Cookie)</button>
+    </div>
+
+    <h3>Status:</h3>
+    <div id="status">Ready...</div>
+
+    <script>
+        // --- IMPORTANT: Change this to your API's HTTPS port ---
+        const API_BASE_URL = "http://localhost:5116";
+        // ---------------------------------------------------
+
+        const registerForm = document.getElementById('register-form');
+        const loginForm = document.getElementById('login-form');
+        const pdfButton = document.getElementById('pdf-button');
+        const statusDiv = document.getElementById('status');
+
+        /**
+         * Step 1: Handle the register form submission
+         */
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            statusDiv.textContent = 'Registering...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    statusDiv.textContent = 'Registration successful! You can now log in.';
+                } else {
+                    const errorText = await response.text();
+                    statusDiv.textContent = `Registration failed: ${errorText}`;
+                }
+            } catch (err) {
+                statusDiv.textContent = `Error: ${err.message}. Is the API running?`;
+            }
+        });
+
+
+        /**
+         * Step 2: Handle the login form submission
+         */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            statusDiv.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    statusDiv.textContent = 'Login successful! Cookie should be set.';
+                } else {
+                    statusDiv.textContent = 'Login failed. Check credentials.';
+                }
+            } catch (err) {
+                statusDiv.textContent = `Error: ${err.message}. Is the API running?`;
+            }
+        });
+
+        // =================================================================
+        // === THIS SECTION IS UPDATED TO MATCH YOUR REQUEST ===
+        // =================================================================
+        /**
+         * Step 3: Handle the "Get PDF" button click
+         */
+        pdfButton.addEventListener('click', async () => {
+            statusDiv.textContent = 'Fetching PDF...';
+            const requestBody = {
+                "template_Id": 1,
+                "nombre": "Ana García",
+                "ocupacion": "Desarrolladora de Software",
+                "email": "ana.garcia@email.com",
+                "telefono": "+11 222 333 444",
+                "direccion": "456 Avenida Principal, Ciudad",
+                "educacion": [
+                    {
+                        "institucion": "Universidad de Tecnología",
+                        "fecha_Graduacion": "2022",
+                        "carrera": "Ingeniería en Informática"
+                    }
+                ],
+                "trabajo": [
+                    {
+                        "empresa": "Innovatech",
+                        "fecha_Inicio": "2022",
+                        "fecha_Final": "Presente",
+                        "puesto": "Desarrolladora Full-Stack"
+                    },
+                    {
+                        "empresa": "Prácticas Web",
+                        "fecha_Inicio": "2021",
+                        "fecha_Final": "2022",
+                        "puesto": "Pasante de Desarrollo"
+                    }
+                ],
+                "habilidades": [
+                    { "habilidad": "C# y .NET Core" },
+                    { "habilidad": "ASP.NET Core" },
+                    { "habilidad": "SQL Server" }
+                ],
+                "intereses": [
+                    { "interes": "Desarrollo de videojuegos" },
+                    { "interes": "Auto-hospedaje (Self-hosting)" }
+                ]
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/pdf/genpdf`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (response.status === 401) {
+                    statusDiv.textContent = 'Failed (401 Unauthorized). Are you logged in?';
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    statusDiv.textContent = `Error: ${response.status} ${response.statusText}. Response: ${errorText}`;
+                    return;
+                }
+
+                // This part remains the same, it handles the PDF download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'hola.pdf'; // Download name
+                document.body.appendChild(a);
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                statusDiv.textContent = 'PDF download initiated!';
+
+            } catch (err) {
+                statusDiv.textContent = `Fetch error: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+
+</html>

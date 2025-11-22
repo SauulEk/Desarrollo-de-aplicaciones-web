@@ -1,0 +1,6 @@
+@docugen_HostAddress = http://localhost:5116
+
+GET {{docugen_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

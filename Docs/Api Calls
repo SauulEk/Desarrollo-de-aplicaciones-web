@@ -1,0 +1,94 @@
+
+#PDF Templates
+
+curl -X POST http://localhost:5116/api/pdf/generate/1 \
+   --output my_cv.pdf
+
+curl http://localhost:5116/api/pdf/list
+
+#Authentication
+
+curl -X POST http://localhost:5116/api/auth/login \
+   -H "Content-Type: application/json" \
+   -d '{"Username": "testuser", "Password": "mypassword"}'
+
+curl -X POST http://localhost:5116/api/auth/register \
+   -H "Content-Type: application/json" \
+   -d '{"Username": "testuser", "Password": "mypassword"}'
+
+#Curriculums
+
+curl -X POST http://localhost:5116/api/cv \
+   -H "Content-Type: application/json" \
+   -d '{
+     "templateId": 1,
+     "userId": 1,
+     "nombre": "Maria Garcia",
+     "ocupacion": "Arquitecta de Software",
+     "email": "maria@example.com",
+     "telefono": "999-999-9999",
+     "direccion": "Merida, Centro",
+     "educacion": [
+       {
+         "institucion": "Tecnologico de Merida",
+         "fecha_Graduacion": "2022",
+         "carrera": "Ingenieria en Sistemas"
+       }
+     ],
+     "trabajo": [
+       {
+         "empresa": "Google",
+         "fecha_Inicio": "2022",
+         "fecha_Final": "Presente",
+         "puesto": "Backend Dev"
+       }
+     ],
+     "habilidades": [
+       { "habilidad": ".NET 8" },
+       { "habilidad": "Azure" }
+     ],
+     "intereses": [
+       { "interes": "Robotica" }
+     ]
+   }'
+
+curl -X GET http://localhost:5116/api/Cv
+
+curl -X GET http://localhost:5116/api/Cv/1
+
+curl -X PUT http://localhost:5116/api/Cv/1 \
+   -H "Content-Type: application/json" \
+   -d '{
+     "id": 1,
+     "templateId": 1,
+     "userId": 1,
+     "nombre": "Maria Garcia Updated",
+     "ocupacion": "CTO",
+     "email": "maria.new@example.com",
+     "telefono": "999-999-9999",
+     "direccion": "Merida, Norte",
+     "educacion": [
+       {
+         "institucion": "Tecnologico de Merida",
+         "fecha_Graduacion": "2022",
+         "carrera": "Ingenieria en Sistemas"
+       }
+     ],
+     "trabajo": [
+       {
+         "empresa": "Microsoft",
+         "fecha_Inicio": "2024",
+         "fecha_Final": "Presente",
+         "puesto": "Senior Manager"
+       }
+     ],
+     "habilidades": [
+       { "habilidad": ".NET 8" },
+       { "habilidad": "Leadership" }
+     ],
+     "intereses": [
+       { "interes": "AI" }
+     ]
+   }'
+
+curl -X DELETE http://localhost:5116/api/Cv/1
