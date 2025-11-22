@@ -57,7 +57,7 @@ namespace docugen.Controllers
                 return Unauthorized("Invalid username or password.");
             }
 
-            var token = GenerateJwtToken(user.Username);
+            var token = GenerateJwtToken(user.Username, user.Id);
 
             Response.Cookies.Append("token", token, new CookieOptions
             {
@@ -70,7 +70,7 @@ namespace docugen.Controllers
             return Ok(new { message = "Login successful" });
         }
 
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(string username, int id)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -78,7 +78,8 @@ namespace docugen.Controllers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("id", id.ToString())
             };
 
             var token = new JwtSecurityToken(

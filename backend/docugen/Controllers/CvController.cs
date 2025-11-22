@@ -1,8 +1,9 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using docugen.Data;
 using docugen.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace docugen.Controllers
 {
@@ -18,11 +19,27 @@ namespace docugen.Controllers
             _context = context;
         }
 
+        // Extrae el id del usuario del token JWT
+        private int GetCurrentUserId()
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("id");
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
+            {
+                return userId;
+            }
+
+            throw new UnauthorizedAccessException("User ID could not be found in the token.");
+        }
+
         // GET: api/Cv
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CvData>>> GetCvs()
         {
+            int userId = GetCurrentUserId();
+
             return await _context.curriculums
+                .Where(c => c.userId == userId)
                 .Include(c => c.Educacion)
                 .Include(c => c.Trabajo)
                 .Include(c => c.Habilidades)
@@ -34,6 +51,8 @@ namespace docugen.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CvData>> GetCvData(int id)
         {
+            int userId = GetCurrentUserId();
+
             var cvData = await _context.curriculums
                 .Include(c => c.Educacion)
                 .Include(c => c.Trabajo)
@@ -46,6 +65,11 @@ namespace docugen.Controllers
                 return NotFound();
             }
 
+            if (cvData.userId != userId)
+            {
+                return NotFound();
+            }
+
             return cvData;
         }
 
@@ -53,7 +77,10 @@ namespace docugen.Controllers
         [HttpPost]
         public async Task<ActionResult<CvData>> PostCvData(CvData cvData)
         {
-            // Evitamos crear un usuario y template por accidente.
+            int userId = GetCurrentUserId();
+
+            cvData.userId = userId;
+
             cvData.user = null;
             cvData.Template = null;
 
@@ -67,10 +94,9 @@ namespace docugen.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCvData(int id, CvData cvData)
         {
-            if (id != cvData.id)
-            {
-                return BadRequest("ID mismatch");
-            }
+            if (id != cvData.id) return BadRequest("ID mismatch");
+
+            int userId = GetCurrentUserId();
 
             var existingCv = await _context.curriculums
                 .Include(c => c.Educacion)
@@ -79,33 +105,30 @@ namespace docugen.Controllers
                 .Include(c => c.Intereses)
                 .FirstOrDefaultAsync(c => c.id == id);
 
-            if (existingCv == null)
+            if (existingCv == null) return NotFound();
+
+            if (existingCv.userId != userId)
             {
                 return NotFound();
             }
 
-            //Update cv
             existingCv.templateId = cvData.templateId;
-            existingCv.userId = cvData.userId;
+            // No se actualiza userId
             existingCv.Nombre = cvData.Nombre;
             existingCv.Ocupacion = cvData.Ocupacion;
             existingCv.Email = cvData.Email;
             existingCv.Telefono = cvData.Telefono;
             existingCv.Direccion = cvData.Direccion;
 
-            // Update Education
             _context.RemoveRange(existingCv.Educacion ?? new List<EducacionItem>());
             existingCv.Educacion = cvData.Educacion;
 
-            // Update Work
             _context.RemoveRange(existingCv.Trabajo ?? new List<TrabajoItem>());
             existingCv.Trabajo = cvData.Trabajo;
 
-            // Update Skills
             _context.RemoveRange(existingCv.Habilidades ?? new List<HabilidadItem>());
             existingCv.Habilidades = cvData.Habilidades;
 
-            // Update Interests
             _context.RemoveRange(existingCv.Intereses ?? new List<InteresItem>());
             existingCv.Intereses = cvData.Intereses;
 
@@ -126,8 +149,13 @@ namespace docugen.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCvData(int id)
         {
+            int userId = GetCurrentUserId();
+
             var cvData = await _context.curriculums.FindAsync(id);
-            if (cvData == null)
+
+            if (cvData == null) return NotFound();
+
+            if (cvData.userId != userId)
             {
                 return NotFound();
             }
