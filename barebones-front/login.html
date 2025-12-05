@@ -17,11 +17,9 @@
 <body>
     <div class="login-container">
         <h3>Iniciar Sesión</h3>
-        <!-- Eliminamos el action para manejarlo con JS -->
         <form id="loginform" onsubmit="event.preventDefault(); handleLogin();">
             <div class="input-group">
                 <label for="auth-user">Usuario:</label>
-                <!-- Cambié type email a text porque la API usa 'Username' -->
                 <input type="text" id="auth-user" placeholder="Introduce tu usuario" required>
             </div>
             <div class="input-group">

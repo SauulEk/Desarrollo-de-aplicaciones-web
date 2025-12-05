@@ -8,12 +8,11 @@ body {
     flex-direction: column;
 }
 
-/* --- Header (Reutilizado) --- */
 header {
     background: rgb(44, 38, 57);
     color: #fff;
     padding: 0.5rem 0;
-    flex-shrink: 0; /* Evita que el header se encoja */
+    flex-shrink: 0;
 }
 
 .container-full {
@@ -44,9 +43,8 @@ header {
     text-decoration: underline;
 }
 
-/* --- Contenedor PDF --- */
 section {
-    flex-grow: 1; /* Ocupa el resto de la altura */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     padding: 2rem;
@@ -80,7 +78,7 @@ h3 {
 
 iframe {
     width: 100%;
-    flex-grow: 1; /* El iframe llena el espacio restante del contenedor */
+    flex-grow: 1;
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: #eee;

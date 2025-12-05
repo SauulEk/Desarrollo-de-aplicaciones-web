@@ -5,7 +5,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-    background: #f4f4f4; /* Color de fondo más suave coincidente con index original */
+    background: #f4f4f4;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;

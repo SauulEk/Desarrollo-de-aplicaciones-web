@@ -5,7 +5,6 @@ body {
     color: #222;
 }
 
-/* --- Header Original --- */
 header {
     background: rgb(44, 38, 57);
     color: #fff;
@@ -16,7 +15,7 @@ header {
 .container-full {
     display: flex;
     align-items: center;
-    justify-content: center; /* Centrado para mejor estética */
+    justify-content: center;
     max-width: 1200px;
     margin: auto;
     height: 40px;
@@ -45,10 +44,9 @@ header {
     text-decoration: underline;
 }
 
-/* --- Contenido Principal --- */
 section .container-ls {
     min-height: 300px;
-    max-width: 900px; /* Ancho ajustado para lectura */
+    max-width: 900px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     background: rgb(255, 255, 255);
     margin: 3rem auto;
@@ -63,7 +61,6 @@ h3 {
     margin-top: 0;
 }
 
-/* --- Lista de CVs (Cards) --- */
 .cv-card {
     background: #fff;
     border: 1px solid #e1e1e1;
@@ -90,7 +87,6 @@ h3 {
     color: #666;
 }
 
-/* --- Botones --- */
 .btn {
     display: inline-block;
     padding: 8px 16px;
@@ -105,14 +101,16 @@ h3 {
     transition: background 0.2s;
 }
 
-.btn:hover {
-    background: #0056b3;
-}
+.btn:hover { background: #0056b3; }
 
-.btn-green {
-    background: #28a745;
-}
+.btn-green { background: #28a745; }
+.btn-green:hover { background: #218838; }
 
-.btn-green:hover {
-    background: #218838;
+.btn-red { background: #dc3545; }
+.btn-red:hover { background: #c82333; }
+
+.btn-yellow { 
+    background: #ffc107; 
+    color: #212529;
 }
+.btn-yellow:hover { background: #e0a800; }

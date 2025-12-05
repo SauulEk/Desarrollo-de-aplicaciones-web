@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear CV - DynaDoc</title>
+    <title>Gestión CV - DynaDoc</title>
     <link href="styles/creacion.css" rel="stylesheet">
     <style>
-        /* Estilos para el formulario traídos y adaptados del index.html */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 600; }
         input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
@@ -30,7 +29,7 @@
     </header>
     <section>
         <div class="container-ls">
-            <h3>Crear Nuevo Currículum</h3>
+            <h3 id="form-title">Crear Nuevo Currículum</h3>
             <p>Completa los datos para generar tu documento.</p>
             
             <div class="form-group">
@@ -38,7 +37,7 @@
                 <select id="create-template"></select>
             </div>
 
-            <form onsubmit="event.preventDefault(); submitCv();">
+            <form onsubmit="event.preventDefault(); handleSubmit();">
                 <h4>Información Personal</h4>
                 <div class="grid-2">
                     <div class="form-group">
@@ -65,7 +64,7 @@
                     <input type="text" id="cv-address">
                 </div>
 
-                <h4>Educación (Última)</h4>
+                <h4>Educación (Principal)</h4>
                 <div class="grid-3">
                     <div class="form-group">
                         <label>Institución</label>
@@ -81,7 +80,7 @@
                     </div>
                 </div>
 
-                <h4>Experiencia Laboral (Última)</h4>
+                <h4>Experiencia Laboral (Reciente)</h4>
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Empresa</label>
@@ -113,7 +112,7 @@
                     <input type="text" id="cv-interests" placeholder="Lectura, Ciclismo">
                 </div>
 
-                <button type="submit" class="btn-submit">Guardar CV</button>
+                <button type="submit" id="btn-save" class="btn-submit">Guardar CV</button>
             </form>
         </div>
     </section>
@@ -125,8 +124,15 @@
 
         if (!token) window.location.href = 'login.html';
 
-        // Cargar plantillas al iniciar
-        window.onload = loadTemplates;
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('id');
+
+        window.onload = async function() {
+            await loadTemplates();
+            if (editId) {
+                setupEditMode(editId);
+            }
+        };
 
         function logout() {
             localStorage.clear();
@@ -150,7 +156,53 @@
             } catch (e) { console.error(e); }
         }
 
-        async function submitCv() {
+        async function setupEditMode(id) {
+            document.getElementById('form-title').innerText = "Editar Currículum";
+            document.getElementById('btn-save').innerText = "Actualizar CV";
+            
+            try {
+                const res = await fetch(`${API_URL}/Cv/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if(!res.ok) throw new Error("Error cargando datos");
+                
+                const data = await res.json();
+                
+                document.getElementById('create-template').value = data.templateId || 1;
+                document.getElementById('cv-name').value = data.nombre || '';
+                document.getElementById('cv-job').value = data.ocupacion || '';
+                document.getElementById('cv-email').value = data.email || '';
+                document.getElementById('cv-phone').value = data.telefono || '';
+                document.getElementById('cv-address').value = data.direccion || '';
+
+                if(data.educacion && data.educacion.length > 0) {
+                    const edu = data.educacion[0];
+                    document.getElementById('cv-edu-school').value = edu.institucion || '';
+                    document.getElementById('cv-edu-degree').value = edu.carrera || '';
+                    document.getElementById('cv-edu-date').value = edu.fecha_Graduacion || '';
+                }
+
+                if(data.trabajo && data.trabajo.length > 0) {
+                    const job = data.trabajo[0];
+                    document.getElementById('cv-work-company').value = job.empresa || '';
+                    document.getElementById('cv-work-role').value = job.puesto || '';
+                    document.getElementById('cv-work-start').value = job.fecha_Inicio || '';
+                    document.getElementById('cv-work-end').value = job.fecha_Final || '';
+                }
+
+                if(data.habilidades) {
+                    document.getElementById('cv-skills').value = data.habilidades.map(h => h.habilidad).join(', ');
+                }
+                if(data.intereses) {
+                    document.getElementById('cv-interests').value = data.intereses.map(i => i.interes).join(', ');
+                }
+
+            } catch(e) {
+                alert("No se pudieron cargar los datos del CV: " + e.message);
+            }
+        }
+
+        async function handleSubmit() {
             const parseList = (str, key) => str.split(',').map(s => s.trim()).filter(s => s).map(s => ({ [key]: s }));
 
             const payload = {
@@ -176,18 +228,30 @@
                 intereses: parseList(document.getElementById('cv-interests').value, "interes")
             };
 
+            let method = 'POST';
+            let url = `${API_URL}/cv`;
+
+            if (editId) {
+                method = 'PUT';
+                url = `${API_URL}/Cv/${editId}`;
+                payload.id = parseInt(editId); 
+            }
+
             try {
-                const res = await fetch(`${API_URL}/cv`, {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(payload)
                 });
-                if (!res.ok) throw new Error("Error guardando CV");
-                alert("CV Creado con éxito");
+
+                if (!res.ok) throw new Error("Error al guardar cambios");
+                
+                alert(editId ? "¡Actualizado correctamente!" : "¡Creado con éxito!");
                 window.location.href = 'generador.html';
+                
             } catch (e) { alert(e.message); }
         }
     </script>

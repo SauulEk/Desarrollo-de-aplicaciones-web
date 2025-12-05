@@ -5,7 +5,6 @@ body {
     color: #222;
 }
 
-/* --- Header (Reutilizado) --- */
 header {
     background: rgb(44, 38, 57);
     color: #fff;
@@ -44,7 +43,6 @@ header {
     text-decoration: underline;
 }
 
-/* --- Contenedor Formulario --- */
 section .container-ls {
     max-width: 800px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -68,7 +66,6 @@ h4 {
     font-size: 1.1rem;
 }
 
-/* --- Estilos de Formulario --- */
 .form-group {
     margin-bottom: 15px;
 }
@@ -99,7 +96,6 @@ input:focus, select:focus {
     outline: none;
 }
 
-/* --- Grillas --- */
 .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -112,14 +108,12 @@ input:focus, select:focus {
     gap: 15px;
 }
 
-/* Responsive para grillas */
 @media (max-width: 600px) {
     .grid-2, .grid-3 {
         grid-template-columns: 1fr;
     }
 }
 
-/* --- Botón Submit --- */
 .btn-submit {
     display: block;
     width: 100%;
