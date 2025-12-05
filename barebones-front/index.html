@@ -1,444 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynaDoc - Full Client</title>
+    <title>DynaDoc - Inicio</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #f4f4f4;
-            color: #333;
-        }
-
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
             text-align: center;
-            color: #2c3e50;
         }
-
-        h2 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            color: #555;
+        .welcome-box {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
         }
-
-        h3 {
-            font-size: 1.1em;
-            color: #007bff;
-            margin-top: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
+        h1 { color: #2c3e50; }
+        p { color: #666; margin-bottom: 30px; }
         .btn {
-            padding: 10px 20px;
-            cursor: pointer;
+            display: inline-block;
+            padding: 12px 30px;
             background: #007bff;
             color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: background 0.2s;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
         }
-
-        .btn:hover {
-            background: #0056b3;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #444;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        /* Grid for side-by-side inputs */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-        }
-
-        .card {
-            border: 1px solid #e1e1e1;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #fff;
-        }
-
-        .error {
-            color: #721c24;
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            display: none;
-        }
+        .btn:hover { background: #0056b3; }
     </style>
 </head>
-
 <body>
 
-    <div class="container">
-        <h1>DynaDoc Client</h1>
-        <div id="error-msg" class="error"></div>
-
-        <div id="view-auth">
-            <h2>Login</h2>
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="auth-user" placeholder="Enter username">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="auth-pass" placeholder="Enter password">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" onclick="handleLogin()">Login</button>
-                <button class="btn btn-secondary" onclick="handleRegister()">Register</button>
-            </div>
-        </div>
-
-        <div id="view-dashboard" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                <h2 style="margin:0; border:none;">My Curriculums</h2>
-                <div>
-                    <button class="btn" onclick="showCreateView()">+ Create New CV</button>
-                    <button class="btn btn-secondary" onclick="logout()">Logout</button>
-                </div>
-            </div>
-            <div id="cv-list">
-                <p style="text-align: center; color: #888;">Loading...</p>
-            </div>
-        </div>
-
-        <div id="view-create" class="hidden">
-            <h2>Create New CV</h2>
-
-            <div class="form-group">
-                <label>Select Template</label>
-                <select id="create-template"></select>
-            </div>
-
-            <h3>Personal Information</h3>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="cv-name" placeholder="e.g. Maria Garcia">
-                </div>
-                <div class="form-group">
-                    <label>Occupation</label>
-                    <input type="text" id="cv-job" placeholder="e.g. Software Engineer">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="cv-email" placeholder="maria@example.com">
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" id="cv-phone" placeholder="555-1234">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Address</label>
-                <input type="text" id="cv-address" placeholder="City, Country">
-            </div>
-
-            <h3>Education (Latest)</h3>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" id="cv-edu-school" placeholder="University Name">
-                </div>
-                <div class="form-group">
-                    <label>Degree/Career</label>
-                    <input type="text" id="cv-edu-degree" placeholder="B.S. Computer Science">
-                </div>
-                <div class="form-group">
-                    <label>Graduation Year</label>
-                    <input type="text" id="cv-edu-date" placeholder="2024">
-                </div>
-            </div>
-
-            <h3>Work Experience (Latest)</h3>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Company</label>
-                    <input type="text" id="cv-work-company" placeholder="Tech Corp">
-                </div>
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" id="cv-work-role" placeholder="Senior Developer">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="text" id="cv-work-start" placeholder="Jan 2020">
-                </div>
-                <div class="form-group">
-                    <label>End Date</label>
-                    <input type="text" id="cv-work-end" placeholder="Present">
-                </div>
-            </div>
-
-            <h3>Skills & Interests</h3>
-            <div class="form-group">
-                <label>Skills (Comma separated)</label>
-                <input type="text" id="cv-skills" placeholder="C#, SQL, React, Docker">
-            </div>
-            <div class="form-group">
-                <label>Interests (Comma separated)</label>
-                <input type="text" id="cv-interests" placeholder="Reading, Hiking, Gaming">
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn" onclick="submitCv()">Save CV</button>
-                <button class="btn btn-secondary" onclick="showDashboard()">Cancel</button>
-            </div>
-        </div>
+    <div class="welcome-box">
+        <h1>Bienvenido a DynaDoc</h1>
+        <p>Gestiona, crea y genera tus currículums profesionales en PDF de manera dinámica.</p>
+        <a href="login.html" class="btn">Ingresar a la Plataforma</a>
     </div>
 
     <script>
-        const API_URL = "http://cv.hjanssen.xyz/api";
-        let token = localStorage.getItem('token');
-        let userId = localStorage.getItem('userId');
-
-        if (token) showDashboard();
-
-        // --- VIEW LOGIC ---
-        function hideAllViews() {
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-create').classList.add('hidden');
-            document.getElementById('error-msg').style.display = 'none';
-        }
-
-        function showDashboard() {
-            hideAllViews();
-            document.getElementById('view-dashboard').classList.remove('hidden');
-            fetchCvs();
-        }
-
-        function showCreateView() {
-            hideAllViews();
-            document.getElementById('view-create').classList.remove('hidden');
-            loadTemplates();
-            // Clear inputs
-            document.querySelectorAll('#view-create input').forEach(i => i.value = '');
-        }
-
-        function logout() {
-            localStorage.clear();
-            token = null; userId = null;
-            hideAllViews();
-            document.getElementById('view-auth').classList.remove('hidden');
-        }
-
-        function showError(msg) {
-            const el = document.getElementById('error-msg');
-            el.innerText = msg;
-            el.style.display = 'block';
-        }
-
-        // --- API CALLS ---
-        async function handleLogin() {
-            const u = document.getElementById('auth-user').value;
-            const p = document.getElementById('auth-pass').value;
-
-            try {
-                const res = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Username: u, Password: p })
-                });
-
-                if (!res.ok) throw new Error("Login failed");
-                const data = await res.json();
-
-                token = data.token;
-                userId = data.userId;
-                localStorage.setItem('token', token);
-                localStorage.setItem('userId', userId);
-                showDashboard();
-            } catch (e) { showError(e.message); }
-        }
-
-        async function handleRegister() {
-            const u = document.getElementById('auth-user').value;
-            const p = document.getElementById('auth-pass').value;
-            try {
-                const res = await fetch(`${API_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Username: u, Password: p })
-                });
-                if (!res.ok) throw new Error("Register failed");
-                alert("Registered! Please login.");
-            } catch (e) { showError(e.message); }
-        }
-
-        async function fetchCvs() {
-            const list = document.getElementById('cv-list');
-            list.innerHTML = 'Loading...';
-            try {
-                const res = await fetch(`${API_URL}/Cv`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.status === 401) return logout();
-                const cvs = await res.json();
-
-                list.innerHTML = "";
-                if (cvs.length === 0) list.innerHTML = "<p>No CVs found.</p>";
-
-                cvs.forEach(cv => {
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.innerHTML = `
-                    <div><strong>${cv.nombre}</strong><br><small>${cv.ocupacion}</small></div>
-                    <button class="btn" onclick="downloadPdf(${cv.id})">PDF</button>
-                `;
-                    list.appendChild(div);
-                });
-            } catch (e) { showError(e.message); }
-        }
-
-        async function loadTemplates() {
-            const select = document.getElementById('create-template');
-            try {
-                const res = await fetch(`${API_URL}/pdf/list`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const templates = await res.json();
-                select.innerHTML = "";
-                templates.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.innerText = t.name || `Template ${t.id}`;
-                    select.appendChild(opt);
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        async function submitCv() {
-            // 1. Helper to split comma separated strings
-            const parseList = (str, key) => str.split(',').map(s => s.trim()).filter(s => s).map(s => ({ [key]: s }));
-
-            // 2. Build the payload
-            const payload = {
-                templateId: parseInt(document.getElementById('create-template').value),
-                userId: parseInt(userId),
-
-                // Basics
-                nombre: document.getElementById('cv-name').value,
-                ocupacion: document.getElementById('cv-job').value,
-                email: document.getElementById('cv-email').value,
-                telefono: document.getElementById('cv-phone').value,
-                direccion: document.getElementById('cv-address').value,
-
-                // Education (Single Item)
-                educacion: [{
-                    institucion: document.getElementById('cv-edu-school').value,
-                    carrera: document.getElementById('cv-edu-degree').value,
-                    fecha_Graduacion: document.getElementById('cv-edu-date').value
-                }],
-
-                // Work (Single Item)
-                trabajo: [{
-                    empresa: document.getElementById('cv-work-company').value,
-                    puesto: document.getElementById('cv-work-role').value,
-                    fecha_Inicio: document.getElementById('cv-work-start').value,
-                    fecha_Final: document.getElementById('cv-work-end').value
-                }],
-
-                // Skills & Interests (Comma Separated)
-                habilidades: parseList(document.getElementById('cv-skills').value, "habilidad"),
-                intereses: parseList(document.getElementById('cv-interests').value, "interes")
-            };
-
-            try {
-                const res = await fetch(`${API_URL}/cv`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-                if (!res.ok) throw new Error("Failed to save CV");
-                showDashboard();
-            } catch (e) { showError(e.message); }
-        }
-
-        async function downloadPdf(cvId) {
-            try {
-                const res = await fetch(`${API_URL}/pdf/generate/${cvId}`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error("Error generating PDF");
-
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `cv_${cvId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } catch (e) { showError(e.message); }
+        // Si el usuario ya tiene token, lo enviamos directo a la aplicación
+        if(localStorage.getItem('token')) {
+            window.location.href = 'generador.html';
         }
     </script>
 </body>
-
 </html>

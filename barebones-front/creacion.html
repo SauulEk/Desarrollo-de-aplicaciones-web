@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear CV - DynaDoc</title>
+    <link href="styles/creacion.css" rel="stylesheet">
+    <style>
+        /* Estilos para el formulario traídos y adaptados del index.html */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .btn-submit { background-color: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        h4 { color: #444; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container-full">
+            <div class="header_center">
+                <ul class="h-menu">
+                    <li class="h-menu_item"><a href="generador.html">Mis Documentos</a></li>
+                    <li class="h-menu_item"><a href="creacion.html">Crear Nuevo CV</a></li>
+                    <li class="h-menu_item"><a href="#" onclick="logout()">Cerrar sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <section>
+        <div class="container-ls">
+            <h3>Crear Nuevo Currículum</h3>
+            <p>Completa los datos para generar tu documento.</p>
+            
+            <div class="form-group">
+                <label>Seleccionar Plantilla</label>
+                <select id="create-template"></select>
+            </div>
+
+            <form onsubmit="event.preventDefault(); submitCv();">
+                <h4>Información Personal</h4>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="cv-name" placeholder="Ej. Maria Garcia" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ocupación</label>
+                        <input type="text" id="cv-job" placeholder="Ej. Ingeniera de Software">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="cv-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="cv-phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="cv-address">
+                </div>
+
+                <h4>Educación (Última)</h4>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Institución</label>
+                        <input type="text" id="cv-edu-school">
+                    </div>
+                    <div class="form-group">
+                        <label>Carrera/Título</label>
+                        <input type="text" id="cv-edu-degree">
+                    </div>
+                    <div class="form-group">
+                        <label>Año Graduación</label>
+                        <input type="text" id="cv-edu-date">
+                    </div>
+                </div>
+
+                <h4>Experiencia Laboral (Última)</h4>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Empresa</label>
+                        <input type="text" id="cv-work-company">
+                    </div>
+                    <div class="form-group">
+                        <label>Puesto</label>
+                        <input type="text" id="cv-work-role">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Inicio</label>
+                        <input type="text" id="cv-work-start">
+                    </div>
+                    <div class="form-group">
+                        <label>Fin</label>
+                        <input type="text" id="cv-work-end" placeholder="Presente">
+                    </div>
+                </div>
+
+                <h4>Habilidades e Intereses</h4>
+                <div class="form-group">
+                    <label>Habilidades (Separadas por coma)</label>
+                    <input type="text" id="cv-skills" placeholder="Java, Liderazgo, Excel">
+                </div>
+                <div class="form-group">
+                    <label>Intereses (Separados por coma)</label>
+                    <input type="text" id="cv-interests" placeholder="Lectura, Ciclismo">
+                </div>
+
+                <button type="submit" class="btn-submit">Guardar CV</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = "http://cv.hjanssen.xyz/api";
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+
+        if (!token) window.location.href = 'login.html';
+
+        // Cargar plantillas al iniciar
+        window.onload = loadTemplates;
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        async function loadTemplates() {
+            const select = document.getElementById('create-template');
+            try {
+                const res = await fetch(`${API_URL}/pdf/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const templates = await res.json();
+                select.innerHTML = "";
+                templates.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.innerText = t.name || `Plantilla ${t.id}`;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function submitCv() {
+            const parseList = (str, key) => str.split(',').map(s => s.trim()).filter(s => s).map(s => ({ [key]: s }));
+
+            const payload = {
+                templateId: parseInt(document.getElementById('create-template').value),
+                userId: parseInt(userId),
+                nombre: document.getElementById('cv-name').value,
+                ocupacion: document.getElementById('cv-job').value,
+                email: document.getElementById('cv-email').value,
+                telefono: document.getElementById('cv-phone').value,
+                direccion: document.getElementById('cv-address').value,
+                educacion: [{
+                    institucion: document.getElementById('cv-edu-school').value,
+                    carrera: document.getElementById('cv-edu-degree').value,
+                    fecha_Graduacion: document.getElementById('cv-edu-date').value
+                }],
+                trabajo: [{
+                    empresa: document.getElementById('cv-work-company').value,
+                    puesto: document.getElementById('cv-work-role').value,
+                    fecha_Inicio: document.getElementById('cv-work-start').value,
+                    fecha_Final: document.getElementById('cv-work-end').value
+                }],
+                habilidades: parseList(document.getElementById('cv-skills').value, "habilidad"),
+                intereses: parseList(document.getElementById('cv-interests').value, "interes")
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/cv`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Error guardando CV");
+                alert("CV Creado con éxito");
+                window.location.href = 'generador.html';
+            } catch (e) { alert(e.message); }
+        }
+    </script>
+</body>
+</html>
