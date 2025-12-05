@@ -19,7 +19,7 @@ public class PdfService
 
         string? apiKey = Environment.GetEnvironmentVariable("API_KEY");
 
-        httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
+        httpClient.DefaultRequestHeaders.Add("x-api-key", "AHUEVO");
     }
 
     public async Task<Stream> RetrievePdf(string html, CvData data)
@@ -31,7 +31,7 @@ public class PdfService
     Encoding.UTF8,
     "application/json");
 
-        HttpResponseMessage response = await httpClient.PostAsync("https://pdf2html-service.onrender.com/convert", jsonContent);
+        HttpResponseMessage response = await httpClient.PostAsync("http://172.17.0.1:1234/convert", jsonContent);
         response.EnsureSuccessStatusCode();
         Stream stream = await response.Content.ReadAsStreamAsync();
 

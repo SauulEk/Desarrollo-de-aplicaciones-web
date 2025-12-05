@@ -1,0 +1,18 @@
+services:
+  webapp:
+    build: .
+    networks:
+      - pdf-network
+    restart: always
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=172.17.0.1;Database=dynadocs;User=hugo;Password=1835;
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Allows using 'host.docker.internal' on Linux
+    ports:
+      # Map Host Port 5000 -> Container Port 8080
+      - "127.0.0.1:5000:8080"
+networks:
+  pdf-network:
+    external: true

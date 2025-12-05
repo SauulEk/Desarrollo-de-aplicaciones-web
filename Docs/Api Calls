@@ -8,11 +8,11 @@ curl http://localhost:5116/api/pdf/list
 
 #Authentication
 
-curl -X POST http://localhost:5116/api/auth/login \
+curl -X POST http://cv.hjanssen.xyz/api/auth/login \
    -H "Content-Type: application/json" \
    -d '{"Username": "testuser", "Password": "mypassword"}'
 
-curl -X POST http://localhost:5116/api/auth/register \
+curl -X POST http://cv.hjanssen.xyz/api/auth/register \
    -H "Content-Type: application/json" \
    -d '{"Username": "testuser", "Password": "mypassword"}'
 
