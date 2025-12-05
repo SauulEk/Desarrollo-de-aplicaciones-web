@@ -83,3 +83,63 @@ iframe {
     border-radius: 4px;
     background-color: #eee;
 }
+
+@media (max-width: 768px) {
+    .container-full {
+        padding: 0 1rem;
+    }
+
+    section {
+        padding: 10px; 
+    }
+
+    .container-ls {
+        padding: 15px; 
+        height: 80vh; 
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    
+    p {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+}
+
+#print-warning {
+    display: none;
+}
+
+@media print {
+    header, 
+    section, 
+    .container-ls, 
+    iframe {
+        display: none;
+    }
+
+    #print-warning {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; 
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+
+    #print-warning h1 {
+        font-size: 24pt;
+        color: #000;
+        margin-bottom: 20px;
+    }
+
+    #print-warning p {
+        font-size: 14pt;
+        color: #333;
+        margin-bottom: 10px;
+    }
+}
