@@ -1,0 +1,116 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: #f6f8f9;
+    color: #222;
+}
+
+header {
+    background: rgb(44, 38, 57);
+    color: #fff;
+    padding: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.container-full {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: auto;
+    height: 40px;
+    padding: 0 2rem;
+}
+
+.header_center .h-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.h-menu_item a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.h-menu_item a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+section .container-ls {
+    min-height: 300px;
+    max-width: 900px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background: rgb(255, 255, 255);
+    margin: 3rem auto;
+    border-radius: 8px;
+    padding: 2.5rem;
+}
+
+h3 {
+    color: #2c3e50;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.cv-card {
+    background: #fff;
+    border: 1px solid #e1e1e1;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.cv-card strong {
+    font-size: 1.1em;
+    color: #333;
+}
+
+.cv-card small {
+    color: #666;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 8px;
+    transition: background 0.2s;
+}
+
+.btn:hover { background: #0056b3; }
+
+.btn-green { background: #28a745; }
+.btn-green:hover { background: #218838; }
+
+.btn-red { background: #dc3545; }
+.btn-red:hover { background: #c82333; }
+
+.btn-yellow { 
+    background: #ffc107; 
+    color: #212529;
+}
+.btn-yellow:hover { background: #e0a800; }

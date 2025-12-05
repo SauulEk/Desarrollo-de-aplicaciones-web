@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - DynaDoc</title>
+    <link href="styles/login.css" rel="stylesheet">
+    <style>
+        .error-msg {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h3>Iniciar Sesión</h3>
+        <form id="loginform" onsubmit="event.preventDefault(); handleLogin();">
+            <div class="input-group">
+                <label for="auth-user">Usuario:</label>
+                <input type="text" id="auth-user" placeholder="Introduce tu usuario" required>
+            </div>
+            <div class="input-group">
+                <label for="auth-pass">Contraseña:</label>
+                <input type="password" id="auth-pass" placeholder="Introduce tu contraseña" required>
+            </div>
+            <div id="error-msg" class="error-msg"></div>
+            <input type="submit" value="Ingresar">
+        </form>
+        <div style="text-align: center; margin-top: 15px;">
+            <p><small>¿No tienes cuenta? <a href="#" onclick="handleRegister()">Regístrate aquí</a></small></p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://cv.hjanssen.xyz/api";
+
+        // Si ya hay token, mandar al dashboard
+        if (localStorage.getItem('token')) {
+            window.location.href = 'generador.html';
+        }
+
+        async function handleLogin() {
+            const u = document.getElementById('auth-user').value;
+            const p = document.getElementById('auth-pass').value;
+            const errorDiv = document.getElementById('error-msg');
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Username: u, Password: p })
+                });
+
+                if (!res.ok) throw new Error("Credenciales incorrectas o error de servidor");
+                
+                const data = await res.json();
+
+                // Guardar sesión
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.userId);
+                
+                // Redireccionar al área principal
+                window.location.href = 'generador.html';
+
+            } catch (e) { 
+                errorDiv.innerText = e.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function handleRegister() {
+            const u = document.getElementById('auth-user').value;
+            const p = document.getElementById('auth-pass').value;
+            if(!u || !p) {
+                alert("Por favor ingresa usuario y contraseña para registrarte.");
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Username: u, Password: p })
+                });
+                if (!res.ok) throw new Error("Error en registro");
+                alert("¡Registrado! Ahora puedes iniciar sesión.");
+            } catch (e) { alert(e.message); }
+        }
+    </script>
+</body>
+</html>

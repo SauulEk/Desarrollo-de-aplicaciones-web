@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Documentos - DynaDoc</title>
+    <link href="styles/generador.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container-full">
+            <div class="header_center">
+                <ul class="h-menu">
+                    <li class="h-menu_item"><a href="generador.html">Mis Documentos</a></li>
+                    <li class="h-menu_item"><a href="creacion.html">Crear Nuevo CV</a></li>
+                    <li class="h-menu_item"><a href="#" onclick="logout()">Cerrar sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <section>
+        <div class="container-ls">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Mis Currículums Generados</h3>
+                <a href="creacion.html" class="btn btn-green">+ Nuevo CV</a>
+            </div>
+            <p>Aquí puedes gestionar tus documentos: ver, editar, descargar o eliminar.</p>
+            
+            <div id="cv-list">
+                <p>Cargando documentos...</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = "http://cv.hjanssen.xyz/api";
+        const token = localStorage.getItem('token');
+
+        if (!token) window.location.href = 'login.html';
+
+        window.onload = fetchCvs;
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        async function fetchCvs() {
+            const list = document.getElementById('cv-list');
+            list.innerHTML = 'Cargando...';
+            
+            try {
+                const res = await fetch(`${API_URL}/Cv`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+                
+                const cvs = await res.json();
+
+                list.innerHTML = "";
+                if (cvs.length === 0) list.innerHTML = "<p>No se encontraron currículums. ¡Crea uno nuevo!</p>";
+
+                cvs.forEach(cv => {
+                    const div = document.createElement('div');
+                    div.className = 'cv-card';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${cv.nombre}</strong><br>
+                            <small>${cv.ocupacion || 'Sin ocupación definida'}</small>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <a href="prev.html?id=${cv.id}" class="btn">Ver</a>
+                            <a href="creacion.html?id=${cv.id}" class="btn btn-yellow">Editar</a>
+                            <button class="btn" onclick="downloadPdf(${cv.id})">Descargar</button>
+                            <button class="btn btn-red" onclick="deleteCv(${cv.id})">Borrar</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (e) {
+                list.innerHTML = `<p style="color:red">Error al cargar: ${e.message}</p>`;
+            }
+        }
+
+        async function downloadPdf(cvId) {
+            try {
+                const res = await fetch(`${API_URL}/pdf/generate/${cvId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error("Error generando PDF");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cv_${cvId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) { alert("Error: " + e.message); }
+        }
+
+        async function deleteCv(id) {
+            if(!confirm("¿Estás seguro de que deseas eliminar este CV permanentemente?")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/Cv/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if(res.ok) {
+                    fetchCvs(); 
+                } else {
+                    throw new Error("Error en el servidor al eliminar");
+                }
+            } catch (error) {
+                alert("No se pudo eliminar: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>
